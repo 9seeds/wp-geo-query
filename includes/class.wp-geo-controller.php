@@ -18,31 +18,34 @@ class WP_Geo_Controller {
 	}
 
 	public function hook() {
-		//add_action( 'parse_query', array( $this, 'parse_query' ) ); //50
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) ); //50
 	}
-
-	/*
-	public function parse_query( $query ) {
-		//set any query flags
-	}
-	*/
 
 	public function pre_get_posts( $query ) {
 
 		$this->geo_query->parse_query_vars( $query->query_vars );
 		if ( $this->geo_query->queries ) {
 			add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
+			//add_filter( 'posts_request', array( $this, 'posts_request' ), 10, 2 );
 		}
 	}
 
 	public function posts_clauses( $pieces, $query ) {
 		global $wpdb;
-		die(print_r($pieces,true));
-		$clauses = $this->geo_query->get_sql(  'post', $wpdb->posts, 'ID', $query );
+
+		//@TODO could also use usermeta, or buddypress xprofile
+		$clauses = $this->geo_query->get_sql( 'post', $wpdb->posts, 'ID', $query );
+		
+		$pieces['fields'] .= $clauses['fields'];
 		$pieces['join'] .= $clauses['join'];
 		$pieces['where'] .= $clauses['where'];
+		//override orderby
+		$pieces['orderby'] = $clauses['orderby'];
 
 		return $pieces;
+	}
+
+	public function posts_request( $request, $query ) {
+		die(print_r($request,true));
 	}
 }

@@ -3,7 +3,7 @@
  * Plugin Name: WP Geo Query
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
- * Version: 1.0
+ * Version: 0.8
  * Author: 9seeds
  * Author URI: 9seeds.com
  * License: GPL2+

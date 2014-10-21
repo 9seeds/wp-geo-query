@@ -4,7 +4,7 @@ class WP_Geo_Query {
 	public $queries = array();
 
 	public function __construct( $geo_query = false ) {
-		if ( !$geo_query )
+		if ( ! $geo_query )
 			return;
 
 		$this->queries = array();
@@ -20,7 +20,7 @@ class WP_Geo_Query {
 	public function parse_query_vars( $qv ) {
 		$geo_query = array();
 
-		if ( !empty( $qv['geo_query'] ) && is_array( $qv['geo_query'] ) ) {
+		if ( ! empty( $qv['geo_query'] ) && is_array( $qv['geo_query'] ) ) {
 			$geo_query = array_merge( $geo_query, $qv['geo_query'] );
 		}
 
@@ -35,154 +35,39 @@ class WP_Geo_Query {
 
 		$meta_id_column = sanitize_key( $type . '_id' );
 
+		//get the 1st query
+		$geo_query = reset( $this->queries );
+		
+		//from
+		//http://stackoverflow.com/questions/574691/mysql-great-circle-distance-haversine-formula
+		//http://www.plumislandmedia.net/mysql/haversine-mysql-nearest-loc/
+		//haversine distance (as the crow flies)
+		//3956 or 3963.17 miles
+		//6371 or 6378.10 km
+		//@TODO add switch for kilometers instead of miles
+
+		//@TODO fix this to prevent SQL injection
+		$fields = ",
+			3956 * 
+			acos( 
+		      cos(radians( {$geo_query['geo_latitude']} ))
+		    * cos(radians( mt_latitude.meta_value ))
+		    * cos(radians( {$geo_query['geo_longitude']} ) - radians( mt_longitude.meta_value ))
+		    + sin(radians( {$geo_query['geo_latitude']} )) 
+		    * sin(radians( mt_latitude.meta_value ))
+		  ) as distance";
+
 		$join = array();
-		$where = array();
-
-		$key_only_queries = array();
-		$queries = array();
-
-		// Split out the queries with empty arrays as value
-		foreach ( $this->queries as $k => $q ) {
-			if ( isset( $q['value'] ) && is_array( $q['value'] ) && empty( $q['value'] ) ) {
-				$key_only_queries[$k] = $q;
-				unset( $this->queries[$k] );
-			}
-		}
-
-		// Split out the meta_key only queries (we can only do this for OR)
-		if ( 'OR' == $this->relation ) {
-			foreach ( $this->queries as $k => $q ) {
-				if ( ( empty( $q['compare'] ) || 'NOT EXISTS' != $q['compare'] ) && ! array_key_exists( 'value', $q ) && ! empty( $q['key'] ) )
-					$key_only_queries[$k] = $q;
-				else
-					$queries[$k] = $q;
-			}
-		} else {
-			$queries = $this->queries;
-		}
-
-		// Specify all the meta_key only queries in one go
-		if ( $key_only_queries ) {
-			$join[]  = "INNER JOIN $meta_table ON $primary_table.$primary_id_column = $meta_table.$meta_id_column";
-
-			foreach ( $key_only_queries as $key => $q )
-				$where["key-only-$key"] = $wpdb->prepare( "$meta_table.meta_key = %s", trim( $q['key'] ) );
-		}
-
-		foreach ( $queries as $k => $q ) {
-			$meta_key = isset( $q['key'] ) ? trim( $q['key'] ) : '';
-			$meta_type = $this->get_cast_for_type( isset( $q['type'] ) ? $q['type'] : '' );
-
-			if ( array_key_exists( 'value', $q ) && is_null( $q['value'] ) )
-				$q['value'] = '';
-
-			$meta_value = isset( $q['value'] ) ? $q['value'] : null;
-
-			if ( isset( $q['compare'] ) )
-				$meta_compare = strtoupper( $q['compare'] );
-			else
-				$meta_compare = is_array( $meta_value ) ? 'IN' : '=';
-
-			if ( ! in_array( $meta_compare, array(
-				'=', '!=', '>', '>=', '<', '<=',
-				'LIKE', 'NOT LIKE',
-				'IN', 'NOT IN',
-				'BETWEEN', 'NOT BETWEEN',
-				'NOT EXISTS',
-				'REGEXP', 'NOT REGEXP', 'RLIKE'
-			) ) )
-				$meta_compare = '=';
-
-			$i = count( $join );
-			$alias = $i ? 'mt' . $i : $meta_table;
-
-			if ( 'NOT EXISTS' == $meta_compare ) {
-				$join[$i]  = "LEFT JOIN $meta_table";
-				$join[$i] .= $i ? " AS $alias" : '';
-				$join[$i] .= " ON ($primary_table.$primary_id_column = $alias.$meta_id_column AND $alias.meta_key = '$meta_key')";
-
-				$where[$k] = ' ' . $alias . '.' . $meta_id_column . ' IS NULL';
-
-				continue;
-			}
-
-			$join[$i]  = "INNER JOIN $meta_table";
-			$join[$i] .= $i ? " AS $alias" : '';
-			$join[$i] .= " ON ($primary_table.$primary_id_column = $alias.$meta_id_column)";
-
-			$where[$k] = '';
-			if ( !empty( $meta_key ) )
-				$where[$k] = $wpdb->prepare( "$alias.meta_key = %s", $meta_key );
-
-			if ( is_null( $meta_value ) ) {
-				if ( empty( $where[$k] ) )
-					unset( $join[$i] );
-				continue;
-			}
-
-			if ( in_array( $meta_compare, array( 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' ) ) ) {
-				if ( ! is_array( $meta_value ) )
-					$meta_value = preg_split( '/[,\s]+/', $meta_value );
-
-				if ( empty( $meta_value ) ) {
-					unset( $join[$i] );
-					continue;
-				}
-			} else {
-				$meta_value = trim( $meta_value );
-			}
-
-			if ( 'IN' == substr( $meta_compare, -2) ) {
-				$meta_compare_string = '(' . substr( str_repeat( ',%s', count( $meta_value ) ), 1 ) . ')';
-			} elseif ( 'BETWEEN' == substr( $meta_compare, -7) ) {
-				$meta_value = array_slice( $meta_value, 0, 2 );
-				$meta_compare_string = '%s AND %s';
-			} elseif ( 'LIKE' == $meta_compare || 'NOT LIKE' == $meta_compare ) {
-				$meta_value = '%' . $wpdb->esc_like( $meta_value ) . '%';
-				$meta_compare_string = '%s';
-			} else {
-				$meta_compare_string = '%s';
-			}
-
-			if ( ! empty( $where[$k] ) )
-				$where[$k] .= ' AND ';
-
-			$where[$k] = ' (' . $where[$k] . $wpdb->prepare( "CAST($alias.meta_value AS {$meta_type}) {$meta_compare} {$meta_compare_string})", $meta_value );
-		}
-
-		$where = array_filter( $where );
-
-		if ( empty( $where ) )
-			$where = '';
-		else
-			$where = ' AND (' . implode( "\n{$this->relation} ", $where ) . ' )';
-
+		$join[] = "LEFT JOIN $meta_table AS mt_latitude ON ( $primary_table.$primary_id_column = mt_latitude.$meta_id_column AND mt_latitude.meta_key = 'geo_latitude' )";
+		$join[] = "LEFT JOIN $meta_table AS mt_longitude ON ( $primary_table.$primary_id_column = mt_longitude.$meta_id_column AND mt_longitude.meta_key = 'geo_longitude' )";
 		$join = implode( "\n", $join );
-		if ( ! empty( $join ) )
-			$join = ' ' . $join;
 
-		return apply_filters_ref_array( 'get_geo_sql', array( compact( 'join', 'where' ), $this->queries, $type, $primary_table, $primary_id_column, $context ) );
+		//@TODO add WHERE distance >= {$distance}
+		$where = '';
+
+		$orderby = "distance ASC";
+		
+		return apply_filters_ref_array( 'get_geo_sql', array( compact( 'fields', 'join', 'where', 'orderby' ), $geo_query, $type, $primary_table, $primary_id_column, $context ) );
 	}
 
-	/*
-SELECT postal_code, 
-	3956 * 2 *
-	ASIN(
-		SQRT(
-			POWER( SIN(
-				( {$center_zip->latitude} - abs( dest.latitude ) ) *
-				pi() / 180 / 2
-			), 2) +
-			COS( {$center_zip->latitude} * pi() / 180 ) * 
-			COS( abs( dest.latitude ) *  pi() / 180 ) *
-			POWER( SIN(
-				( {$center_zip->longitude} - dest.longitude ) *  pi() / 180 / 2
-			), 2)
-		)
-	) as distance 
-FROM geolocation dest
-where postal_code != ''
-having distance < {$dist}
-ORDER BY distance
-	*/	  
 }
