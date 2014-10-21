@@ -1,6 +1,0 @@
-<?php
-
-class WP_Geo_Query extends WP_Query {
-
-
-}
