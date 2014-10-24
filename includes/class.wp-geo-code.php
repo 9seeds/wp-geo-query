@@ -7,7 +7,8 @@ class WP_Geo_Code {
 	public function get_postal_code( $lat, $lon ) {
 
 		$args = array(
-			'address' => "{$lat},{$lon}",
+			'latlng' => "{$lat},{$lon}",
+			'result_type' => 'postal_code',
 			'key' => $this->key
 		);
 		$url = add_query_arg( $args, $this->geocode_url );

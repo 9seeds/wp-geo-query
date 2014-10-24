@@ -32,7 +32,7 @@ function wp_geo_query_init() {
 	$controller->hook();
 
 	if ( ! is_admin() ) {
-		wp_register_style( 'font-awesome', WP_GEO_URL . 'lib/Font-Awesome/css/font-awesome.min.css', array(), '4.2.0' );
+		wp_register_style( 'font-awesome', WP_GEO_URL . 'lib/font-awesome/css/font-awesome.min.css', array(), '4.2.0' );
 		wp_register_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
 	}
 

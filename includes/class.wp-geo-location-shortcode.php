@@ -32,7 +32,7 @@ class WP_Geo_Location_Shortcode {
 			<form method='get' action=''>
 				<label>Enter ZIP code or enter city, state.</label>
 				<div>
-					<i class='fa fa-location-arrow fa-2x'></i> 
+					<i id='wp-geo-arrow' class='fa fa-location-arrow fa-2x'></i> 
                     <input id='wp-geo-location' class='form-control' type='text' size='15' name='location' placeholder='{$placeholder}' value='{$this->best_location['postal_code']}' />
                     <button type='submit'>
 	                   	<i class='fa fa-search'></i>

@@ -59,14 +59,23 @@ var ua_location;
 		*/
 	}
 
-	if ( wp_geo.has_ua_cache != "1" ) {
-		//ask for location right away	
+	function wp_geo_ask_location() {
 		if (navigator.geolocation) {
-			alert('asking');
+			//alert('asking');
 			navigator.geolocation.getCurrentPosition(wp_geo_position, wp_geo_error);
 		} else {
 			//Geolocation is not supported by this browser.
 		}
 	}
+
+
+	if ( wp_geo.has_ua_cache != "1" ) {
+		//ask for location right away	
+		wp_geo_ask_location();
+	}
+
+	$(document).ready(function($) {
+		$('#wp-geo-arrow').on('click', wp_geo_ask_location);
+	});
 
 }(jQuery));
