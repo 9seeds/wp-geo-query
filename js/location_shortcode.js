@@ -69,7 +69,6 @@ var ua_location;
 		}
 	}
 
-
 	function wp_geo_submit() {
 		//alert('hey');
 		//return false;

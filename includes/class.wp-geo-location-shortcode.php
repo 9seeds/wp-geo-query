@@ -4,6 +4,7 @@ class WP_Geo_Location_Shortcode {
 
 	private static $instance;
 	private $query;
+	private $geo_ip;
 	private $locations;
 	private $best_location;
 
@@ -28,12 +29,11 @@ class WP_Geo_Location_Shortcode {
 	public function do_shortcode( $atts, $content='' ) {
 		$placeholder = isset( $atts['placeholder'] ) ? esc_attr( $atts['placeholder'] ) : '';
 
+		$best_location = isset( $_GET['location'] ) ? trim( $_GET['location'] ) : $this->best_location['postal_code'];
+
 		ob_start();
-
 		include WP_GEO_DIR . 'views/location_shortcode.php';
-
-		do_action( 'wp_geo_location_after' );
-		
+		do_action( 'wp_geo_location_after' );		
 		return ob_get_clean();;
 	}
 
@@ -48,7 +48,41 @@ class WP_Geo_Location_Shortcode {
 	}
 
 	private function maybe_process_form() {
+		if ( isset( $_GET['location'] ) ) {
+			$user_location = trim( $_GET['location'] );
+
+			//only do comparisons if user entered postal-code
+			if ( is_numeric( $user_location ) ) {
+			
+				$this->load_locations();
+
+				if ( $user_location != $this->locations[WP_Geo_IP::CACHE_IP]['postal_code'] ) {
+
+				
+					if ( isset( $this->locations[WP_Geo_IP::CACHE_UA]['postal_code'] ) ) {
+
+						if ( $user_location != $this->locations[WP_Geo_IP::CACHE_UA]['postal_code'] ) {
+							//didn't match UA postal code, save location
+							$this->save_user_location( $user_location );
+						}
+					
+					} else { //no UA postal code cached, save this new location
+						$this->save_user_location( $user_location );
+					}
+				}
+			}
+			//not a postal code, look up and save location
+			$this->save_user_location( $user_location );
+		}
 		//die(print_r($_REQUEST,true));
+	}
+
+	private function save_user_location( $fuzzy_address ) {
+		$code = new WP_Geo_Code();
+		$user_location = $code->get_location( $fuzzy_address );
+
+		$this->load_geo_ip();
+		$this->geo_ip->update_cache_location( $user_location, WP_Geo_IP::CACHE_USER );
 	}
 
 	public function maybe_enqueue() {
@@ -77,10 +111,20 @@ class WP_Geo_Location_Shortcode {
 		}
 	}
 
+	private function load_geo_ip() {
+		if ( $this->geo_ip )
+			return;
+
+		$this->geo_ip = new WP_Geo_IP();
+	}
+
 	private function load_locations() {
-		$ip = new WP_Geo_IP();
-		$this->best_location = $ip->get_best_location();
-		$this->locations = $ip->get_cache_location();
+		if ( $this->locations )
+			return;
+		
+		$this->load_geo_ip();		
+		$this->best_location = $this->geo_ip->get_best_location();
+		$this->locations = $this->geo_ip->get_cache_location();
 		//die('<pre>'.print_r($this->locations,true));
 	}
 
@@ -92,8 +136,8 @@ class WP_Geo_Location_Shortcode {
 		$code = new WP_Geo_Code();
 		$ua_location['postal_code'] = $code->get_postal_code( $ua_location['latitude'], $ua_location['longitude'] );
 
-		$ip = new WP_Geo_IP();
-		$ip->update_cache_location( $ua_location, WP_Geo_IP::CACHE_UA );
+		$this->load_geo_ip();
+		$this->geo_ip->update_cache_location( $ua_location, WP_Geo_IP::CACHE_UA );
 		
 		die( $ua_location['postal_code'] );
 	}

@@ -2,7 +2,7 @@
 	<label>Enter ZIP code or enter city, state.</label>
 	<div>
 		<i id='wp-geo-arrow' class='fa fa-location-arrow fa-2x'></i> 
-		<input id='wp-geo-location' class='form-control' type='text' size='15' name='location' placeholder='<?php echo $placeholder ?>' value='<?php echo $this->best_location['postal_code'] ?>' />
+		<input id='wp-geo-location' class='form-control' type='text' size='15' name='location' placeholder='<?php echo $placeholder ?>' value='<?php echo $best_location ?>' />
 		<button type='submit'>
 			<i class='fa fa-search'></i>
 		</button>
