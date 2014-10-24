@@ -27,28 +27,14 @@ class WP_Geo_Location_Shortcode {
 
 	public function do_shortcode( $atts, $content='' ) {
 		$placeholder = isset( $atts['placeholder'] ) ? esc_attr( $atts['placeholder'] ) : '';
+
+		ob_start();
+
+		include WP_GEO_DIR . 'views/location_shortcode.php';
+
+		do_action( 'wp_geo_location_after' );
 		
-		$html = "
-			<form method='get' action=''>
-				<label>Enter ZIP code or enter city, state.</label>
-				<div>
-					<i id='wp-geo-arrow' class='fa fa-location-arrow fa-2x'></i> 
-                    <input id='wp-geo-location' class='form-control' type='text' size='15' name='location' placeholder='{$placeholder}' value='{$this->best_location['postal_code']}' />
-                    <button type='submit'>
-	                   	<i class='fa fa-search'></i>
-                    </button>
-                </div>
-		";
-
-		$html .= '
-			</form>
-		';
-
-		//put these outside the form so they're not submitted
-		foreach ( $this->locations[WP_Geo_IP::CACHE_IP] as $index => $value ) {
-			$html .= "<input type='hidden' id='ip_{$index}' name='ip[{$index}]' value='{$value}' />\n";
-		}
-		return $html;
+		return ob_get_clean();;
 	}
 
 	public function pre_get_posts( $query ) {		

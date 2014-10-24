@@ -13,7 +13,8 @@ var ua_location;
 			wp_geo.ajaxurl,
 			data,
 			function ( response ) {
-				if ( response != $('#wp-geo-location').val() ) {
+				ua_zip = response;
+				if ( ua_zip != $('#wp-geo-location').val() ) {
 					$('#wp-geo-location').val( response );
 				}
 			}		
@@ -69,6 +70,12 @@ var ua_location;
 	}
 
 
+	function wp_geo_submit() {
+		//alert('hey');
+		//return false;
+		return true;
+	}
+
 	if ( wp_geo.has_ua_cache != "1" ) {
 		//ask for location right away	
 		wp_geo_ask_location();
@@ -76,6 +83,8 @@ var ua_location;
 
 	$(document).ready(function($) {
 		$('#wp-geo-arrow').on('click', wp_geo_ask_location);
+
+		$('#wp-geo-search').on('submit', wp_geo_submit);
 	});
 
 }(jQuery));
