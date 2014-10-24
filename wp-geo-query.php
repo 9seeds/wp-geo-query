@@ -11,51 +11,35 @@
  * Domain Path: /languages/
  */
 
+define( 'WP_GEO_VERSION', '0.8' );
 define( 'WP_GEO_DIR', plugin_dir_path( __FILE__ ) );
+define( 'WP_GEO_URL', plugins_url( '/' , __FILE__ ) );
+define( 'WP_GEO_COOKIE', 'wp_geo_' . COOKIEHASH );
+define( 'WP_GEO_SECURE_COOKIE', 'wp_geo_sec_' . COOKIEHASH );
 
 require_once WP_GEO_DIR . 'includes/class.wp-geo-controller.php';
 require_once WP_GEO_DIR . 'includes/class.wp-geo-query.php';
-
-function geo_get_posts( $args = null ) {
-	$defaults = array(
-		'numberposts' => 5, 'offset' => 0,
-		'category' => 0, 'orderby' => 'date',
-		'order' => 'DESC', 'include' => array(),
-		'exclude' => array(), 'meta_key' => '',
-		'meta_value' =>'', 'post_type' => 'post',
-	);
-
-	$r = wp_parse_args( $args, $defaults );
-	if ( empty( $r['post_status'] ) )
-		$r['post_status'] = ( 'attachment' == $r['post_type'] ) ? 'inherit' : 'publish';
-	if ( ! empty( $r['numberposts'] ) && empty( $r['posts_per_page'] ) )
-		$r['posts_per_page'] = $r['numberposts'];
-	if ( ! empty( $r['category'] ) )
-		$r['cat'] = $r['category'];
-	if ( ! empty( $r['include'] ) ) {
-		$incposts = wp_parse_id_list( $r['include'] );
-		$r['posts_per_page'] = count( $incposts );  // only the number of posts included
-		$r['post__in'] = $incposts;
-	} elseif ( ! empty( $r['exclude'] ) )
-		$r['post__not_in'] = wp_parse_id_list( $r['exclude'] );
-
-	$r['ignore_sticky_posts'] = true;
-	$r['no_found_rows'] = true;
-	$r['suppress_filters'] = false;
-	
-	$geo_posts = new WP_Query();
-	return $geo_posts->query( $r );
-}
+require_once WP_GEO_DIR . 'includes/class.wp-geo-ip.php';
+require_once WP_GEO_DIR . 'includes/class.wp-geo-location-shortcode.php';
+require_once WP_GEO_DIR . 'includes/class.wp-geo-code.php';
 
 function wp_geo_controller() {
 	return WP_Geo_Controller::get_instance();
 }
 
-function geo_query_init() {
+function wp_geo_query_init() {
 	$controller = wp_geo_controller();
 	$controller->hook();
+
+	if ( ! is_admin() ) {
+		wp_register_style( 'font-awesome', WP_GEO_URL . 'lib/Font-Awesome/css/font-awesome.min.css', array(), '4.2.0' );
+		wp_register_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
+	}
+
+	//init the shortcode
+	WP_Geo_Location_Shortcode::get_instance();	
 }
-add_action( 'init', 'geo_query_init' );
+add_action( 'init', 'wp_geo_query_init' );
 
 /*
 $args = array(
@@ -66,7 +50,7 @@ $args = array(
 	),
 	'orderby' => 'distance'
 );
-$posts = geo_get_posts( $args );
+$posts = wp_geo_get_posts( $args );
 OR
 $geo_query = new WP_Query();
 $posts = $geo_query->query( $args );

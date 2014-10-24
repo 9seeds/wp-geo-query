@@ -22,7 +22,6 @@ class WP_Geo_Controller {
 	}
 
 	public function pre_get_posts( $query ) {
-
 		$this->geo_query->parse_query_vars( $query->query_vars );
 		if ( $this->geo_query->queries ) {
 			add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
