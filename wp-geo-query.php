@@ -49,6 +49,12 @@ add_action( 'init', 'wp_geo_query_init' );
 //@TODO make setting for this
 add_filter( 'wp_session_expiration', function() { return 15 * MINUTE_IN_SECONDS; } ); // Set expiration to 15 minutes
 
+//remove session creation on every page to prevent un-caching
+function wp_geo_prevent_session_start() {
+	remove_action( 'plugins_loaded', 'wp_session_start' );
+}
+add_action( 'plugins_loaded', 'wp_geo_prevent_session_start', 9 );
+
 /*
 $args = array(
 	'post_type' => 'post',
