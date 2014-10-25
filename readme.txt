@@ -39,3 +39,6 @@ curl -i "https://maps.googleapis.com/maps/api/place/textsearch/json?query=Route+
 service = new google.maps.places.PlacesService(map);
 service.textSearch(request, callback);
 
+http://mikejolley.com/2013/12/problems-with-cart-sessions-and-woocommerce/
+https://github.com/woothemes/woocommerce/issues/3513
+https://eamann.com/tech/wp_session-a-proposal/

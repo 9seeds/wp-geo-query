@@ -8,5 +8,5 @@
 		</button>
 	</div>
 </form>
-<input type='hidden' id='ip_postal_code' name='ip_postal_code' value='<?php echo $this->locations[WP_Geo_IP::CACHE_IP]['postal_code'] ?>' />
-<input type='hidden' id='ua_postal_code' name='ua_postal_code' value='<?php $this->locations[WP_Geo_IP::CACHE_UA]['postal_code'] ?>' />
+<input type='hidden' id='ip_postal_code' name='ip_postal_code' value='<?php echo $locations[WP_Geo_Cache::IP]['postal_code'] ?>' />
+<input type='hidden' id='ua_postal_code' name='ua_postal_code' value='<?php $locations[WP_Geo_Cache::UA]['postal_code'] ?>' />

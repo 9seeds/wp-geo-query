@@ -9,7 +9,7 @@ class WP_Geo_Controller {
 		$this->geo_query = new WP_Geo_Query();
 	}
 
-	public function get_instance() {
+	public static function get_instance() {
 		if ( ! self::$instance ) {
 			$class = __CLASS__;
 			self::$instance = new $class();
@@ -45,6 +45,6 @@ class WP_Geo_Controller {
 	}
 
 	public function posts_request( $request, $query ) {
-		die(print_r($request,true));
+		die('<pre>'.print_r($request,true));
 	}
 }

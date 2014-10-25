@@ -65,7 +65,7 @@ class WP_Geo_Code {
 				$components[$type] = $component->short_name;
  		}
 
-		$components['latitiude'] = $result->geometry->location->lat;
+		$components['latitude'] = $result->geometry->location->lat;
 		$components['longitude'] = $result->geometry->location->lng;
 
 		return $components;

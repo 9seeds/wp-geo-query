@@ -16,22 +16,27 @@ define( 'WP_GEO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WP_GEO_URL', plugins_url( '/' , __FILE__ ) );
 define( 'WP_GEO_COOKIE', 'wp_geo_' . COOKIEHASH );
 define( 'WP_GEO_SECURE_COOKIE', 'wp_geo_sec_' . COOKIEHASH );
+//for session requirements
+define( 'WP_GEO_SESSION_DIR', 'wp-session-manager' );
+define( 'WP_GEO_SESSION_FILE', 'wp-session-manager.php' );
 
 require_once WP_GEO_DIR . 'includes/class.wp-geo-controller.php';
+require_once WP_GEO_DIR . 'includes/class.wp-geo-cache.php';
+
 require_once WP_GEO_DIR . 'includes/class.wp-geo-query.php';
 require_once WP_GEO_DIR . 'includes/class.wp-geo-ip.php';
 require_once WP_GEO_DIR . 'includes/class.wp-geo-location-shortcode.php';
 require_once WP_GEO_DIR . 'includes/class.wp-geo-code.php';
 
-function wp_geo_controller() {
-	return WP_Geo_Controller::get_instance();
-}
-
 function wp_geo_query_init() {
-	$controller = wp_geo_controller();
+	$controller = WP_Geo_Controller::get_instance();
 	$controller->hook();
 
-	if ( ! is_admin() ) {
+	if ( is_admin() ) {
+		require_once WP_GEO_DIR . 'includes/class.wp-geo-admin.php';
+		$admin = new WP_Geo_Admin();
+		$admin->hook();
+	} else {
 		wp_register_style( 'font-awesome', WP_GEO_URL . 'lib/font-awesome/css/font-awesome.min.css', array(), '4.2.0' );
 		wp_register_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
 	}
@@ -40,6 +45,9 @@ function wp_geo_query_init() {
 	WP_Geo_Location_Shortcode::get_instance();	
 }
 add_action( 'init', 'wp_geo_query_init' );
+
+//@TODO make setting for this
+add_filter( 'wp_session_expiration', function() { return 15 * MINUTE_IN_SECONDS; } ); // Set expiration to 15 minutes
 
 /*
 $args = array(
