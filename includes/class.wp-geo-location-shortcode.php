@@ -86,6 +86,7 @@ class WP_Geo_Location_Shortcode {
 				
 				//enqueue
 				wp_enqueue_style( 'font-awesome' );
+				wp_enqueue_style( 'location-shortcode' );
 				wp_localize_script( 'location-shortcode', 'wp_geo',
 							array(
 								'ajaxurl' => admin_url( 'admin-ajax.php' ),
@@ -107,7 +108,7 @@ class WP_Geo_Location_Shortcode {
 
 		ob_start();
 		include WP_GEO_DIR . 'views/location_shortcode.php';
-		do_action( 'wp_geo_location_after' );		
+		do_action( 'wp_geo_location_after' );
 		return ob_get_clean();;
 	}
 
@@ -137,7 +138,8 @@ class WP_Geo_Location_Shortcode {
 
 		$cache = WP_Geo_Cache::get_instance();
 		$cache->update( $ua_location, WP_Geo_Cache::UA );
-		
+
+		//halt execution with print-out
 		die( $ua_location['postal_code'] );
 	}
 

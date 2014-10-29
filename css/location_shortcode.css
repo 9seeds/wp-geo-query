@@ -1,0 +1,55 @@
+#wp-geo-search {
+	width: 100%;
+	display: inline-block;
+	margin: 0 0 1.25em 0;
+}
+#wp-geo-search div {
+	margin: 0.625em 0 0 0;
+}
+#wp-geo-search #wp-geo-arrow,
+#wp-geo-search input#wp-geo-location,
+#wp-geo-search button {
+	float: left;
+}
+#wp-geo-search #wp-geo-arrow,
+#wp-geo-search button {
+	width: 10%;
+}
+#wp-geo-search #wp-geo-arrow {
+	padding: 0 0.5em 0.5em 0.5em;
+	cursor: pointer;
+	cursor: hand;
+	text-align: center;
+}
+#wp-geo-search #wp-geo-arrow .wp-geo-arrow-text {
+	font-size: 0.375em;
+	display: inherit;
+	margin-top: 0.250em;
+}
+#wp-geo-search input#wp-geo-location {
+	width: 75%;
+	padding: 0.75em;
+}
+#wp-geo-search button {
+	margin: 0 0 0 0.625em;
+	padding: 0.938em;
+}
+
+@media only screen and (max-width: 767px) {
+	#wp-geo-search #wp-geo-arrow {
+		margin-right: 0.625em;
+	}
+}
+
+@media only screen and (max-width: 760px) {
+	#wp-geo-search #wp-geo-arrow{
+		margin-right: 0.625em;
+		width: 15%;
+	}
+	#wp-geo-search input#wp-geo-location {
+		width: 60%;
+	}
+	#wp-geo-search button{
+		width: 15%;
+	}
+}

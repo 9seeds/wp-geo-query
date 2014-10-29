@@ -1,7 +1,7 @@
 <form id='wp-geo-search' method='get' action=''>
 	<label>Enter ZIP code or enter city, state.</label>
 	<div>
-		<i id='wp-geo-arrow' class='fa fa-location-arrow fa-2x'></i> 
+		<i id='wp-geo-arrow' class='fa fa-location-arrow fa-2x'><span class="wp-geo-arrow-text">Locate</span></i> 
 		<input id='wp-geo-location' class='form-control' type='text' size='15' name='location' placeholder='<?php echo $placeholder ?>' value='<?php echo $best_location ?>' />
 		<button type='submit'>
 			<i class='fa fa-search'></i>

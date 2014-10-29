@@ -14,8 +14,6 @@
 define( 'WP_GEO_VERSION', '0.8' );
 define( 'WP_GEO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WP_GEO_URL', plugins_url( '/' , __FILE__ ) );
-define( 'WP_GEO_COOKIE', 'wp_geo_' . COOKIEHASH );
-define( 'WP_GEO_SECURE_COOKIE', 'wp_geo_sec_' . COOKIEHASH );
 //for session requirements
 define( 'WP_GEO_SESSION_DIR', 'wp-session-manager' );
 define( 'WP_GEO_SESSION_FILE', 'wp-session-manager.php' );
@@ -38,6 +36,7 @@ function wp_geo_query_init() {
 		$admin->hook();
 	} else {
 		wp_register_style( 'font-awesome', WP_GEO_URL . 'lib/font-awesome/css/font-awesome.min.css', array(), '4.2.0' );
+		wp_register_style( 'location-shortcode', WP_GEO_URL . 'css/location_shortcode.css', array(), WP_GEO_VERSION );
 		wp_register_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
 	}
 
@@ -61,10 +60,13 @@ $args = array(
 	'geo_query' => array(
 		'lat' => 45,
 		'lon' => 99,
+		'distance' => '25',
+		'operator' => '<', // ('>', '>=', '<', or '<=') Default value is '<'.
 	),
-	'orderby' => 'distance'
+	'orderby' => 'distance', //assumed if 'orderby' not set
+	'order' => 'ASC', //assumed ASC if 'order' not set AND orderby = 'distance'
 );
-$posts = wp_geo_get_posts( $args );
+$posts = get_posts( $args );
 OR
 $geo_query = new WP_Query();
 $posts = $geo_query->query( $args );
