@@ -12,6 +12,7 @@ class WP_Geo_Location_Shortcode {
 		add_action( 'pre_get_posts',  array( $this, 'pre_get_posts' ) );
 		add_action( 'wp_ajax_geolocation', array( $this, 'ajax_save_ua_location' ) );
 		add_action( 'wp_ajax_nopriv_geolocation', array( $this, 'ajax_save_ua_location' ) );
+		add_action( 'wp_geo_location_after', array( $this, 'print_location_results' ) );
 		
 		//add_action( 'all', array( $this, 'hook_debug' ) );
 		//add_filter( 'all', array( $this, 'hook_debug' ) );
@@ -77,10 +78,8 @@ class WP_Geo_Location_Shortcode {
 				 && array_key_exists( 2, $matches )
 				 && in_array( 'wp_geo_location', $matches[2] ) ) {
 
-				$cache = WP_Geo_Cache::get_instance();
-				
-
 				//@TODO maybe look for option here to not load GeoIP
+				$cache = WP_Geo_Cache::get_instance();
 				if ( ! $cache->has( WP_Geo_Cache::IP ) )					
 					$this->save_ip_location();
 				
@@ -110,6 +109,40 @@ class WP_Geo_Location_Shortcode {
 		include WP_GEO_DIR . 'views/location_shortcode.php';
 		do_action( 'wp_geo_location_after' );
 		return ob_get_clean();;
+	}
+
+	public function print_location_results() {
+		global $paged, $query_args;
+
+		$cache = WP_Geo_Cache::get_instance();
+		$best_location = $cache->get_best_location();
+
+		//@TODO add default args
+		$args = array(
+			'post_type' => 'casino',
+			'geo_query' => array(
+				array(
+					'geo_latitude' => $best_location['latitude'],
+					'geo_longitude' => $best_location['longitude'],
+				)
+			),
+			'paged' => $paged, // respect pagination
+		);
+
+		$template_name = 'geo-templates/location-shortcode.php';
+		$template = locate_template( $template_name );
+		if ( ! $template )
+			$template = WP_GEO_DIR . "views/{$template_name}";
+
+		//loop
+		$geo_query = new WP_Query( wp_parse_args( $query_args, $args ) );
+		if ( $geo_query->have_posts() ) { 
+			while ( $geo_query->have_posts() ) { 
+				$geo_query->the_post();
+				include $template;
+			}
+		}
+		wp_reset_postdata();
 	}
 
 	private function save_ip_location() {
