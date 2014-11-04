@@ -89,12 +89,14 @@ class WP_Geo_Location_Shortcode {
 				//enqueue
 				wp_enqueue_style( 'font-awesome', WP_GEO_URL . 'lib/font-awesome/css/font-awesome.min.css', array(), '4.2.0' );
 				wp_enqueue_style( 'location-shortcode', WP_GEO_URL . 'css/location_shortcode.css', array(), WP_GEO_VERSION );
+
+				wp_register_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
 				wp_localize_script( 'location-shortcode', 'wp_geo',
 							array(
 								'ajaxurl' => admin_url( 'admin-ajax.php' ),
 								'has_ua_cache' => $cache->has( WP_Geo_Cache::UA ),
 				) );
-				wp_enqueue_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
+				wp_enqueue_script( 'location-shortcode' );
 				return;
 			}
 		}
