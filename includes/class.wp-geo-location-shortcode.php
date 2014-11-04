@@ -95,6 +95,7 @@ class WP_Geo_Location_Shortcode {
 							array(
 								'ajaxurl' => admin_url( 'admin-ajax.php' ),
 								'has_ua_cache' => $cache->has( WP_Geo_Cache::UA ),
+								'has_user_cache' => isset( $_GET['location'] ),
 				) );
 				wp_enqueue_script( 'location-shortcode' );
 				return;

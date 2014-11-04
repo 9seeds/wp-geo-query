@@ -75,7 +75,7 @@ var ua_location;
 		return true;
 	}
 
-	if ( wp_geo.has_ua_cache != "1" ) {
+	if ( wp_geo.has_ua_cache != "1" && wp_geo.has_user_cache != "1" ) {
 		//ask for location right away	
 		wp_geo_ask_location();
 	}
