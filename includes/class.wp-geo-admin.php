@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @TODO notice to add API Key
+ */
 class WP_Geo_Admin {
 
 	private $session_dir;

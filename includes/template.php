@@ -20,11 +20,15 @@ function wp_geo_get_map_img( $args = NULL, $post = NULL ) {
 	$code = new WP_Geo_Code();
 	$routes = $code->get_directions( $start, $end );
 
+	//@TODO error checking if no routes
 	$route = reset( $routes );
 
-	$defaults = array(
-		'polyline' => $route->overview_polyline->points,
-	);
+	$defaults = array();
+	
+	if ( isset( $route->overview_polyline->points ) )
+		$defaults['polyline'] = $route->overview_polyline->points;
+	else
+		$defaults['markers'] = array( '&middot;' => $end );
 
 	$args = wp_parse_args( $args, $defaults );
 	

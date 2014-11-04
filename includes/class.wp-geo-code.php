@@ -118,6 +118,10 @@ class WP_Geo_Code {
 				$url .= $polyline;
 			}
 			
+		} else if ( isset( $markers ) && is_array( $markers ) ) {
+			foreach ( $markers as $label => $coords ) {
+				$url .= "&markers=color:{$color}|label:{$label}|{$coords}";
+			}
 		}
 
 		$url .= $key;
@@ -135,7 +139,7 @@ class WP_Geo_Code {
 			'key' => $this->get_key(),
 		);
 		$url = add_query_arg( $args, $this->directions_url );
-		
+
 		$result = wp_remote_get( $url );
 
 		if ( is_wp_error( $result ) )
