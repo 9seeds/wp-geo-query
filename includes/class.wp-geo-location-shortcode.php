@@ -45,9 +45,9 @@ class WP_Geo_Location_Shortcode {
 
 				$cache = WP_Geo_Cache::get_instance();
 				$locations = $cache->get();
-
-				if ( $user_location != $locations[WP_Geo_Cache::IP]['postal_code'] ) {
-
+				$ip_location = isset( $locations[WP_Geo_Cache::IP]['postal_code'] ) ? $locations[WP_Geo_Cache::IP]['postal_code'] : NULL;
+				
+				if ( $user_location != $ip_location ) {
 				
 					if ( isset( $locations[WP_Geo_Cache::UA]['postal_code'] ) ) {
 
@@ -78,20 +78,23 @@ class WP_Geo_Location_Shortcode {
 				 && array_key_exists( 2, $matches )
 				 && in_array( 'wp_geo_location', $matches[2] ) ) {
 
+				//for templating
+				require_once WP_GEO_DIR . 'includes/template.php';
+				
 				//@TODO maybe look for option here to not load GeoIP
 				$cache = WP_Geo_Cache::get_instance();
 				if ( ! $cache->has( WP_Geo_Cache::IP ) )					
 					$this->save_ip_location();
 				
 				//enqueue
-				wp_enqueue_style( 'font-awesome' );
-				wp_enqueue_style( 'location-shortcode' );
+				wp_enqueue_style( 'font-awesome', WP_GEO_URL . 'lib/font-awesome/css/font-awesome.min.css', array(), '4.2.0' );
+				wp_enqueue_style( 'location-shortcode', WP_GEO_URL . 'css/location_shortcode.css', array(), WP_GEO_VERSION );
 				wp_localize_script( 'location-shortcode', 'wp_geo',
 							array(
 								'ajaxurl' => admin_url( 'admin-ajax.php' ),
 								'has_ua_cache' => $cache->has( WP_Geo_Cache::UA ),
 				) );
-				wp_enqueue_script( 'location-shortcode' );
+				wp_enqueue_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
 				return;
 			}
 		}
@@ -112,6 +115,9 @@ class WP_Geo_Location_Shortcode {
 	}
 
 	public function print_location_results() {
+		if ( ! isset( $_GET['location'] ) )
+			return;
+		
 		global $paged, $query_args;
 
 		$cache = WP_Geo_Cache::get_instance();
@@ -135,10 +141,10 @@ class WP_Geo_Location_Shortcode {
 			$template = WP_GEO_DIR . "views/{$template_name}";
 
 		//loop
-		$geo_query = new WP_Query( wp_parse_args( $query_args, $args ) );
-		if ( $geo_query->have_posts() ) { 
-			while ( $geo_query->have_posts() ) { 
-				$geo_query->the_post();
+		$wp_geo_query = new WP_Query( wp_parse_args( $query_args, $args ) );
+		if ( $wp_geo_query->have_posts() ) {
+			while ( $wp_geo_query->have_posts() ) { 
+				$wp_geo_query->the_post();
 				include $template;
 			}
 		}
@@ -157,8 +163,10 @@ class WP_Geo_Location_Shortcode {
 		$code = new WP_Geo_Code();
 		$user_location = $code->get_location( $fuzzy_address );
 
-		$cache = WP_Geo_Cache::get_instance();
-		$cache->update( $user_location, WP_Geo_Cache::USER );
+		if ( ! is_wp_error( $user_location ) ) {		
+			$cache = WP_Geo_Cache::get_instance();
+			$cache->update( $user_location, WP_Geo_Cache::USER );
+		}
 	}
 
 	public function ajax_save_ua_location() {

@@ -9,4 +9,6 @@
 	</div>
 </form>
 <input type='hidden' id='ip_postal_code' name='ip_postal_code' value='<?php echo $locations[WP_Geo_Cache::IP]['postal_code'] ?>' />
+<?php if ( isset( $locations[WP_Geo_Cache::UA]['postal_code'] ) ) : ?>
 <input type='hidden' id='ua_postal_code' name='ua_postal_code' value='<?php $locations[WP_Geo_Cache::UA]['postal_code'] ?>' />
+<?php endif; // has user-agent location ?>

@@ -33,9 +33,7 @@ function wp_geo_load() {
 		$admin = new WP_Geo_Admin();
 		$admin->hook();
 	} else {
-		wp_register_style( 'font-awesome', WP_GEO_URL . 'lib/font-awesome/css/font-awesome.min.css', array(), '4.2.0' );
-		wp_register_style( 'location-shortcode', WP_GEO_URL . 'css/location_shortcode.css', array(), WP_GEO_VERSION );
-		wp_register_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
+		//front-end only
 	}
 	//load for front-end & wp-admin
 
