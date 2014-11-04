@@ -26,9 +26,7 @@ require_once WP_GEO_DIR . 'includes/class.wp-geo-ip.php';
 require_once WP_GEO_DIR . 'includes/class.wp-geo-location-shortcode.php';
 require_once WP_GEO_DIR . 'includes/class.wp-geo-code.php';
 
-function wp_geo_query_init() {
-	$controller = WP_Geo_Controller::get_instance();
-	$controller->hook();
+function wp_geo_load() {
 
 	if ( is_admin() ) {
 		require_once WP_GEO_DIR . 'includes/class.wp-geo-admin.php';
@@ -39,11 +37,15 @@ function wp_geo_query_init() {
 		wp_register_style( 'location-shortcode', WP_GEO_URL . 'css/location_shortcode.css', array(), WP_GEO_VERSION );
 		wp_register_script( 'location-shortcode', WP_GEO_URL . 'js/location_shortcode.js', array( 'jquery' ), WP_GEO_VERSION );
 	}
+	//load for front-end & wp-admin
 
+	//init the query controller
+	$controller = WP_Geo_Controller::get_instance();
+	$controller->hook();
 	//init the shortcode
 	WP_Geo_Location_Shortcode::get_instance();	
 }
-add_action( 'init', 'wp_geo_query_init' );
+add_action( 'plugins_loaded', 'wp_geo_load' );
 
 //@TODO make setting for this
 add_filter( 'wp_session_expiration', function() { return 15 * MINUTE_IN_SECONDS; } ); // Set expiration to 15 minutes
@@ -51,8 +53,9 @@ add_filter( 'wp_session_expiration', function() { return 15 * MINUTE_IN_SECONDS;
 //remove session creation on every page to prevent un-caching
 function wp_geo_prevent_session_start() {
 	remove_action( 'plugins_loaded', 'wp_session_start' );
+	remove_action( 'shutdown', 'wp_session_write_close' );
 }
-add_action( 'plugins_loaded', 'wp_geo_prevent_session_start', 9 );
+add_action( 'plugins_loaded', 'wp_geo_prevent_session_start', 9 ); //run before WP_Session's plugins_loaded
 
 /*
 $args = array(

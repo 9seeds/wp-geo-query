@@ -18,6 +18,8 @@ class WP_Geo_Cache {
 	
 	private function __construct() {
 		$this->session = WP_Session::get_instance(); //starts a session if not already started
+		add_action( 'shutdown', 'wp_session_write_close' ); //write session on shutdown
+		
 		$this->order = array( self::USER, self::UA, self::IP );
 	}
 

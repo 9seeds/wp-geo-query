@@ -1,14 +1,14 @@
 <?php
 
 class WP_Geo_Code {
-	private $key = 'AIzaSyDqcwoYBESLz_dVgcHFIygL_3RLlpw9srg';
+	private $key;
 	private $geocode_url = 'https://maps.googleapis.com/maps/api/geocode/json';
 	
 	public function get_postal_code( $lat, $lon ) {
 		$args = array(
 			'latlng' => "{$lat},{$lon}",
 			'result_type' => 'postal_code',
-			'key' => $this->key
+			'key' => $this->get_key()
 		);
 		$url = add_query_arg( $args, $this->geocode_url );
 		
@@ -36,7 +36,7 @@ class WP_Geo_Code {
 	public function get_location( $fuzzy_address ) {
 		$args = array(
 			'address' => urlencode( $fuzzy_address ),
-			'key' => $this->key
+			'key' => $this->get_key()
 		);
 		$url = add_query_arg( $args, $this->geocode_url );
 		
@@ -69,6 +69,12 @@ class WP_Geo_Code {
 		$components['longitude'] = $result->geometry->location->lng;
 
 		return $components;
+	}
+
+	private function get_key() {
+		if ( ! $this->key )
+			$this->key = get_option( 'wp_geo_api_key' );
+		return $this->key;
 	}
 
 }

@@ -27,7 +27,7 @@ class WP_Geo_Location_Shortcode {
 	}
 
 	public function pre_get_posts( $query ) {
-		if ( is_admin() || ! is_main_query() )
+		if ( is_admin() || ! $query->is_main_query() )
 			return;
 
 		$this->maybe_process_form();
@@ -129,7 +129,7 @@ class WP_Geo_Location_Shortcode {
 			'paged' => $paged, // respect pagination
 		);
 
-		$template_name = 'geo-templates/location-shortcode.php';
+		$template_name = 'geo-templates/location-template.php';
 		$template = locate_template( $template_name );
 		if ( ! $template )
 			$template = WP_GEO_DIR . "views/{$template_name}";

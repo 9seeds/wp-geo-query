@@ -1,3 +1,4 @@
+
 This product includes GeoLite data created by MaxMind, available from 
 <a href="http://www.maxmind.com">http://www.maxmind.com</a>.
 
@@ -42,3 +43,9 @@ service.textSearch(request, callback);
 http://mikejolley.com/2013/12/problems-with-cart-sessions-and-woocommerce/
 https://github.com/woothemes/woocommerce/issues/3513
 https://eamann.com/tech/wp_session-a-proposal/
+
+
+Get Directions:
+https://maps.googleapis.com/maps/api/directions/json?origin=Chicago,IL&destination=Los+Angeles,CA&waypoints=Joplin,MO|Oklahoma+City,OK&key=API_KEY
+Turn encoded polyline "overview_polyline" into static map:
+https://developers.google.com/maps/documentation/staticmaps/?csw=1#Paths
