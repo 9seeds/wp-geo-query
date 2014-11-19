@@ -128,7 +128,6 @@ class WP_Geo_Location_Shortcode {
 
 		//@TODO add default args
 		$args = array(
-			'post_type' => 'casino',
 			'geo_query' => array(
 				array(
 					'geo_latitude' => $best_location['latitude'],
@@ -143,6 +142,10 @@ class WP_Geo_Location_Shortcode {
 		if ( ! $template )
 			$template = WP_GEO_DIR . "views/{$template_name}";
 
+
+		//give a chance to override args
+		$args = apply_filters( 'wp_geo_query_args', $args );
+		
 		//loop
 		$wp_geo_query = new WP_Query( wp_parse_args( $query_args, $args ) );
 		if ( $wp_geo_query->have_posts() ) {
